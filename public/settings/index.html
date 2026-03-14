@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Maintenance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            cursor: default;
+            font-feature-settings: "cv02", "cv03", "cv04";
+        }
+
+        .action-card {
+            @apply flex items-center p-4 mb-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-transparent hover:bg-white hover:border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-200 cursor-pointer active:scale-[0.99];
+        }
+
+        .icon-wrapper {
+            @apply w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-white/10 shadow-sm mr-4 text-gray-400 transition-colors;
+        }
+
+        .action-card:hover .icon-wrapper {
+            @apply text-blue-500;
+        }
+
+        .status-dot {
+            @apply w-1.5 h-1.5 rounded-full mr-2;
+        }
+
+        .version-label {
+            @apply text-[13px] font-medium text-gray-400 dark:text-gray-500;
+        }
+    </style>
+</head>
+
+<body class="bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100">
+
+    <div
+        class="dialog-container !h-[600px] !max-w-[850px] !p-0 flex overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl">
+        <div class="flex flex-col w-full h-full bg-white dark:bg-[#0d0d0d] relative overflow-hidden">
+
+            <header
+                class="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/[0.02] backdrop-blur-md">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">System Core</h1>
+                    <div class="flex items-center gap-4 mt-1">
+                        <div class="flex items-center text-[11px] font-medium uppercase tracking-wider text-gray-400">
+                            <div id="v-main-dot" class="status-dot bg-red-500 animate-pulse"></div>
+                            Server: <span id="v-main" class="ml-1 text-gray-600 dark:text-gray-300">Detecting...</span>
+                        </div>
+                        <div class="flex items-center text-[11px] font-medium uppercase tracking-wider text-gray-400">
+                            <div id="v-updater-dot" class="status-dot bg-red-500"></div>
+                            Updater: <span id="v-updater" class="ml-1 text-gray-600 dark:text-gray-300">Offline</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="location.href='../index.html'"
+                    class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-100 dark:bg-white/5 hover:bg-blue-500 hover:text-white transition-all">
+                    EXIT TO TERMINAL
+                </button>
+            </header>
+
+            <main class="flex-1 p-8 overflow-y-auto grid grid-cols-2 gap-6">
+
+                <section>
+                    <h3 class="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] mb-4">Software Deployment
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="action-card !mb-0 group"
+                            onclick="runUpdate('3123', 'update', 'Syncing Repository...')">
+                            <div
+                                class="icon-wrapper bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold">Main Application</h4>
+                                <p class="text-[11px] text-gray-500 leading-tight">Pull latest build from production
+                                    branch</p>
+                            </div>
+                        </div>
+
+                        <div class="action-card !mb-0 group"
+                            onclick="runUpdate('3111', 'update-updater', 'Patching Updater...')">
+                            <div class="icon-wrapper">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold">Service Scripts</h4>
+                                <p class="text-[11px] text-gray-500 leading-tight">Sync background maintenance protocols
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-[10px] font-bold text-purple-500 uppercase tracking-[0.2em] mb-4">Service Control
+                    </h3>
+                    <div
+                        class="bg-gray-50 dark:bg-white/[0.03] rounded-2xl border border-gray-100 dark:border-white/5 p-6 h-full">
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="p-3 rounded-xl bg-purple-500/10 text-purple-500">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="m12 8 4 4-4 4" />
+                                    <path d="M8 12h8" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold">Background Daemon</h4>
+                                <p class="text-xs text-gray-500 mt-1">If services are showing 'Offline', initialize the
+                                    manual handshake.</p>
+                            </div>
+                        </div>
+                        <button onclick="runUpdate('3111', 'start-updater', 'Waking Daemon...')"
+                            class="w-full py-3 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm font-bold hover:border-purple-500/50 hover:bg-purple-500/5 transition-all active:scale-95">
+                            Initialize Updater
+                        </button>
+                    </div>
+                </section>
+            </main>
+
+            <footer
+                class="px-8 py-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-black/20">
+                <div class="flex items-center gap-3">
+                    <div id="loader" class="hidden">
+                        <div class="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin">
+                        </div>
+                    </div>
+                    <span id="statusText" class="text-[11px] font-mono uppercase tracking-widest text-gray-400">System
+                        Ready</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-[10px] text-gray-300 dark:text-gray-600 font-mono">NODE_ENV: production</span>
+                    <span
+                        class="text-[10px] px-2 py-0.5 rounded border border-gray-200 dark:border-white/10 text-gray-400 font-mono">v1.0.42</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('statusText');
+        const loader = document.getElementById('loader');
+
+        async function getVersions() {
+            const fetchVer = async (port, elementId) => {
+                const dot = document.getElementById(`${elementId}-dot`);
+                const label = document.getElementById(elementId);
+                try {
+                    const res = await fetch(`http://localhost:${port}/version?cache=${Date.now()}`);
+                    const ver = await res.text();
+                    label.innerText = `v${ver.trim()}`;
+                    label.classList.remove('text-gray-400');
+                    dot.classList.replace('bg-red-500', 'bg-green-500');
+                } catch (e) {
+                    label.innerText = "Offline";
+                    label.classList.add('text-gray-400');
+                    dot.classList.replace('bg-green-500', 'bg-red-500');
+                }
+            };
+            fetchVer('3111', 'v-main');
+            fetchVer('3123', 'v-updater');
+        }
+
+        async function runUpdate(port, endpoint, msg) {
+            statusText.innerText = msg;
+            statusText.classList.replace('text-gray-400', 'text-blue-500');
+            loader.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`http://localhost:${port}/${endpoint}`, { method: 'POST' });
+                if (res.ok) {
+                    statusText.innerText = "Task completed successfully";
+                    statusText.classList.replace('text-blue-500', 'text-green-500');
+                } else {
+                    statusText.innerText = "Server error occurred";
+                    statusText.classList.replace('text-blue-500', 'text-red-500');
+                }
+            } catch (err) {
+                statusText.innerText = "Connection failed";
+                statusText.classList.replace('text-blue-500', 'text-red-500');
+            } finally {
+                loader.classList.add('hidden');
+                setTimeout(() => {
+                    statusText.innerText = "System ready";
+                    statusText.className = "text-sm font-medium text-gray-400";
+                    getVersions();
+                }, 3000);
+            }
+        }
+
+        getVersions();
+        setInterval(getVersions, 15000);
+    </script>
+</body>
+
+</html>
