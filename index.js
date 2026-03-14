@@ -103,9 +103,8 @@ app.get("/version", (req, res) => {
 // API Endpoint to handle high-quality print
 app.post("/upload", upload.array("files"), (req, res) => {
 	const files = req.files;
-	if (!files || files.length === 0) {
+	if (!files || files.length === 0)
 		return res.status(400).json({ error: "No files received" });
-	}
 
 	console.log(`\n[Job Received] ${new Date().toLocaleTimeString()}`);
 
@@ -113,34 +112,35 @@ app.post("/upload", upload.array("files"), (req, res) => {
 		const absolutePath = path.resolve(file.path);
 
 		/**
-		 * POWERSHELL EXECUTION
-		 * -Verb Print: Uses the default Windows app to print.
-		 * -WindowStyle Hidden: Minimizes UI disruption while lid is closed.
+		 * DIRECT PRINT VIA EDGE
+		 * This bypasses the "No application associated" error by calling
+		 * Microsoft Edge directly in 'headless' print mode.
 		 */
-		const psCommand = `Start-Process -FilePath "${absolutePath}" -Verb Print -WindowStyle Hidden -ErrorAction SilentlyContinue`;
+		const edgeCommand = `Start-Process "msedge.exe" -ArgumentList "--kiosk-printing", "--print-to-default", "${absolutePath}" -WindowStyle Hidden`;
 
-		exec(`powershell -Command "${psCommand}"`, (error) => {
+		exec(`powershell -Command "${edgeCommand}"`, (error) => {
 			if (error) {
-				console.error(`Print Error (${file.filename}):`, error.message);
+				console.error(`Print Error:`, error.message);
+				// Fallback to basic start if Edge fails
+				exec(
+					`start /min "" shell:AppsFolder\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge --print-to-default "${absolutePath}"`,
+				);
 			} else {
-				console.log(`Successfully spooled: ${file.filename}`);
+				console.log(
+					`Successfully sent to Edge Spooler: ${file.filename}`,
+				);
 			}
 
-			// CLEANUP: 60s delay to ensure the spooler has finished reading the file
 			setTimeout(() => {
 				fs.unlink(absolutePath, (err) => {
-					if (err) console.error(`Cleanup failed:`, err);
-					else console.log(`Deleted temp file: ${file.filename}`);
+					if (!err)
+						console.log(`Deleted temp file: ${file.filename}`);
 				});
 			}, 60000);
 		});
 	});
 
-	res.json({
-		success: true,
-		message: "Files sent to printer spooler.",
-		jobCount: files.length,
-	});
+	res.json({ success: true, message: "Sent to printer via Edge." });
 });
 
 app.post("/kill", (req, res) => {
