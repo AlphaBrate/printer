@@ -1,7 +1,7 @@
 const PRINTERS = [
 	{
-		showName: "HP LaserJet Pro M404",
-		sysName: "HP_LASER_JET_PRO",
+		showName: "HP LaserJet Professional P1102",
+		sysName: "HP_LASER_JET_P1102",
 		papers: ["A4"],
 		colors: ["mono"],
 	},
@@ -79,7 +79,7 @@ function updatePrinterCapabilities() {
 // --- Dynamic Text Color based on background brightness ---
 function getBottomBrightness(imgSrc) {
 	return new Promise((resolve) => {
-		if (!imgSrc) return resolve("dark"); 
+		if (!imgSrc) return resolve("dark");
 		const img = new Image();
 		img.onload = () => {
 			const canvas = document.createElement("canvas");
@@ -101,7 +101,9 @@ function getBottomBrightness(imgSrc) {
 
 			try {
 				const data = ctx.getImageData(0, 0, 64, 16).data;
-				let rSum = 0, gSum = 0, bSum = 0;
+				let rSum = 0,
+					gSum = 0,
+					bSum = 0;
 				const pixelCount = 64 * 16;
 
 				for (let i = 0; i < data.length; i += 4) {
@@ -157,7 +159,7 @@ async function handleFiles(files) {
 			// Store original image for printing
 			const fileId = Date.now() + Math.random();
 			rawFileData.set(fileId, file);
-			
+
 			const reader = new FileReader();
 			reader.onload = async (e) =>
 				await addPage(e.target.result, file.name, "Image", fileId, 1);
@@ -182,16 +184,17 @@ async function processPDF(file) {
 		const context = canvas.getContext("2d");
 		canvas.height = viewport.height;
 		canvas.width = viewport.width;
-		
-		await page.render({ canvasContext: context, viewport: viewport }).promise;
-		
+
+		await page.render({ canvasContext: context, viewport: viewport })
+			.promise;
+
 		// The preview still uses the canvas, but we link it to the raw fileId and specific page number
 		await addPage(
 			canvas.toDataURL(),
 			`${file.name} (Page ${i})`,
 			"PDF Page",
 			fileId,
-			i
+			i,
 		);
 	}
 }
@@ -203,7 +206,16 @@ async function addPage(src, name, type, rawId, pageNum) {
 		textColor = await getBottomBrightness(src);
 	}
 	// Include rawId and pageNum in the page object for the final print job
-	pages.push({ id, enabled: true, src, name, type, textColor, rawId, pageNum });
+	pages.push({
+		id,
+		enabled: true,
+		src,
+		name,
+		type,
+		textColor,
+		rawId,
+		pageNum,
+	});
 	renderFullList();
 }
 
@@ -374,8 +386,18 @@ const contextMenu = document.getElementById("customContextMenu");
 
 function hideContextMenu() {
 	if (!contextMenu) return;
-	contextMenu.classList.add("opacity-0", "pointer-events-none", "scale-95", "blur-[6px]");
-	contextMenu.classList.remove("opacity-100", "pointer-events-auto", "scale-100", "blur-0");
+	contextMenu.classList.add(
+		"opacity-0",
+		"pointer-events-none",
+		"scale-95",
+		"blur-[6px]",
+	);
+	contextMenu.classList.remove(
+		"opacity-100",
+		"pointer-events-auto",
+		"scale-100",
+		"blur-0",
+	);
 }
 
 function showContextMenu(e, id) {
@@ -393,8 +415,18 @@ function showContextMenu(e, id) {
 	contextMenu.style.left = `${x}px`;
 	contextMenu.style.top = `${y}px`;
 
-	contextMenu.classList.remove("opacity-0", "pointer-events-none", "scale-95", "blur-[6px]");
-	contextMenu.classList.add("opacity-100", "pointer-events-auto", "scale-100", "blur-0");
+	contextMenu.classList.remove(
+		"opacity-0",
+		"pointer-events-none",
+		"scale-95",
+		"blur-[6px]",
+	);
+	contextMenu.classList.add(
+		"opacity-100",
+		"pointer-events-auto",
+		"scale-100",
+		"blur-0",
+	);
 }
 
 document.addEventListener("click", (e) => {
@@ -455,11 +487,14 @@ function getDynamicTextWidth(text, sourceElement) {
 function updateUI() {
 	const printerSelect = document.getElementById("printerSelect");
 	if (!printerSelect) return;
-	
+
 	const printer = printerSelect.value;
-	const rangeType = document.querySelector('input[name="pageRange"]:checked').value;
+	const rangeType = document.querySelector(
+		'input[name="pageRange"]:checked',
+	).value;
 	const color = document.getElementById("colorMode").value;
-	const scaleBase = (parseInt(document.getElementById("scaling").value) || 100) / 100;
+	const scaleBase =
+		(parseInt(document.getElementById("scaling").value) || 100) / 100;
 
 	const fromVal = parseInt(document.getElementById("rangeFrom").value) || 1;
 	const toVal = parseInt(document.getElementById("rangeTo").value) || 1;
@@ -495,7 +530,8 @@ function updateUI() {
 
 		const img = card.querySelector(".preview-img");
 		if (img) {
-			img.style.filter = color === "mono" ? "grayscale(1) contrast(1.1)" : "none";
+			img.style.filter =
+				color === "mono" ? "grayscale(1) contrast(1.1)" : "none";
 		}
 
 		if (page.enabled && !isOutOfRange) printedCount++;
@@ -515,24 +551,32 @@ function updateUI() {
 	const labelContainer = document.getElementById("labelContainer");
 
 	if (numberEl && labelEl && numContainer && labelContainer) {
-		const newNumberText = printedCount === 0 ? "No" : printedCount.toString();
+		const newNumberText =
+			printedCount === 0 ? "No" : printedCount.toString();
 		const newLabelText = printedCount <= 1 ? "Page" : "Pages";
 
-		if (!numContainer.style.width) numContainer.style.width = getDynamicTextWidth(numberEl.innerText, numberEl) + "px";
-		if (!labelContainer.style.width) labelContainer.style.width = getDynamicTextWidth(labelEl.innerText, labelEl) + "px";
+		if (!numContainer.style.width)
+			numContainer.style.width =
+				getDynamicTextWidth(numberEl.innerText, numberEl) + "px";
+		if (!labelContainer.style.width)
+			labelContainer.style.width =
+				getDynamicTextWidth(labelEl.innerText, labelEl) + "px";
 
 		if (numberEl.innerText !== newNumberText) {
-			numContainer.style.width = getDynamicTextWidth(newNumberText, numberEl) + "px";
+			numContainer.style.width =
+				getDynamicTextWidth(newNumberText, numberEl) + "px";
 			animateSlot(numberEl, newNumberText);
 		}
 
 		if (labelEl.innerText !== newLabelText) {
-			labelContainer.style.width = getDynamicTextWidth(newLabelText, labelEl) + "px";
+			labelContainer.style.width =
+				getDynamicTextWidth(newLabelText, labelEl) + "px";
 			animateSlot(labelEl, newLabelText);
 		}
 	}
 
-	document.getElementById("printBtn").disabled = printedCount === 0 || printer === "" || rangeError;
+	document.getElementById("printBtn").disabled =
+		printedCount === 0 || printer === "" || rangeError;
 }
 
 function animateSlot(el, newText) {
@@ -557,28 +601,37 @@ async function executePrint() {
 	const sysName = document.getElementById("printerSelect").value;
 	const printerObj = PRINTERS.find((p) => p.sysName === sysName);
 	const copies = document.getElementById("copies").value;
-	const orientation = "portrait"; 
-	const color = document.getElementById("colorMode").value === "mono" ? "/grayscale" : "/color";
+	const orientation = "portrait";
+	const color =
+		document.getElementById("colorMode").value === "mono"
+			? "/grayscale"
+			: "/color";
 	const scaling = document.getElementById("scaling").value;
 	const paper = document.getElementById("paperSize").value;
-	const rangeType = document.querySelector('input[name="pageRange"]:checked').value;
+	const rangeType = document.querySelector(
+		'input[name="pageRange"]:checked',
+	).value;
 	const from = parseInt(document.getElementById("rangeFrom").value);
 	const to = parseInt(document.getElementById("rangeTo").value);
 
 	const enabledPages = pages.filter((p) => p.enabled);
-	const finalSelection = rangeType === "all" ? enabledPages : enabledPages.slice(from - 1, to);
+	const finalSelection =
+		rangeType === "all" ? enabledPages : enabledPages.slice(from - 1, to);
 
 	const cmd = `print --printer "${printerObj.showName} [${sysName}]" --copies ${copies} --paper ${paper} --orientation ${orientation} ${color} --scale ${scaling}% --files "${finalSelection.map((p) => p.name).join(", ")}"`;
 
-	console.log("%c>>> SYSTEM PRINT COMMAND EXECUTED <<<", "color: #007aff; font-weight: bold; font-size: 14px;");
+	console.log(
+		"%c>>> SYSTEM PRINT COMMAND EXECUTED <<<",
+		"color: #007aff; font-weight: bold; font-size: 14px;",
+	);
 	console.log(cmd);
 
 	const formData = new FormData();
-	formData.append('printCommand', cmd);
+	formData.append("printCommand", cmd);
 
 	// 1. Group the selected pages by their source file (rawId)
 	const selectionByFile = {};
-	finalSelection.forEach(page => {
+	finalSelection.forEach((page) => {
 		if (page.rawId) {
 			if (!selectionByFile[page.rawId]) {
 				selectionByFile[page.rawId] = [];
@@ -588,12 +641,12 @@ async function executePrint() {
 	});
 
 	// 2. Append each unique file only ONCE
-	Object.keys(selectionByFile).forEach(rawId => {
+	Object.keys(selectionByFile).forEach((rawId) => {
 		const originalFile = rawFileData.get(parseFloat(rawId));
 		if (originalFile) {
 			// Send the file and the specific pages needed from it
-			formData.append('files', originalFile);
-			formData.append('pageRanges', selectionByFile[rawId].join(',')); 
+			formData.append("files", originalFile);
+			formData.append("pageRanges", selectionByFile[rawId].join(","));
 		}
 	});
 
@@ -601,11 +654,11 @@ async function executePrint() {
 	const oldText = btn.innerText;
 
 	try {
-		const response = await fetch('/upload', {
-			method: 'POST',
-			body: formData
+		const response = await fetch("/upload", {
+			method: "POST",
+			body: formData,
 		});
-		
+
 		if (response.ok) {
 			console.log("Print successful");
 			btn.innerText = "Command Dispatched";
