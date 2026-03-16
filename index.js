@@ -5,6 +5,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const { exec } = require("child_process");
 const os = require("os");
+const ptp = require("pdf-to-printer");
 
 const app = express();
 const PORT = 3111;
@@ -101,46 +102,37 @@ app.get("/version", (req, res) => {
 });
 
 // API Endpoint to handle high-quality print
-app.post("/upload", upload.array("files"), (req, res) => {
+app.post("/upload", upload.array("files"), async (req, res) => {
 	const files = req.files;
-	if (!files || files.length === 0)
+	if (!files || files.length === 0) {
 		return res.status(400).json({ error: "No files received" });
+	}
 
 	console.log(`\n[Job Received] ${new Date().toLocaleTimeString()}`);
 
-	files.forEach((file) => {
+	for (const file of files) {
 		const absolutePath = path.resolve(file.path);
 
-		/**
-		 * DIRECT PRINT VIA EDGE
-		 * This bypasses the "No application associated" error by calling
-		 * Microsoft Edge directly in 'headless' print mode.
-		 */
-		const edgeCommand = `Start-Process "msedge.exe" -ArgumentList "--kiosk-printing", "--print-to-default", "${absolutePath}" -WindowStyle Hidden`;
+		// DIRECT PRINTING LOGIC
+		ptp.print(absolutePath)
+			.then(() => {
+				console.log(`Successfully printed: ${file.originalname}`);
 
-		exec(`powershell -Command "${edgeCommand}"`, (error) => {
-			if (error) {
-				console.error(`Print Error:`, error.message);
-				// Fallback to basic start if Edge fails
-				exec(
-					`start /min "" shell:AppsFolder\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge --print-to-default "${absolutePath}"`,
-				);
-			} else {
-				console.log(
-					`Successfully sent to Edge Spooler: ${file.filename}`,
-				);
-			}
-
-			setTimeout(() => {
-				fs.unlink(absolutePath, (err) => {
-					if (!err)
+				// Cleanup: Delete file after successful spooling
+				// We can delete faster now because we aren't waiting on a browser
+				setTimeout(() => {
+					if (fs.existsSync(absolutePath)) {
+						fs.unlinkSync(absolutePath);
 						console.log(`Deleted temp file: ${file.filename}`);
-				});
-			}, 60000);
-		});
-	});
+					}
+				}, 5000);
+			})
+			.catch((err) => {
+				console.error(`Print Error for ${file.filename}:`, err);
+			});
+	}
 
-	res.json({ success: true, message: "Sent to printer via Edge." });
+	res.json({ success: true, message: "Jobs sent to printer spooler." });
 });
 
 app.post("/kill", (req, res) => {

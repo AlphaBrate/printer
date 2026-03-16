@@ -4,6 +4,7 @@
     "express": "^5.2.1",
     "fs": "^0.0.1-security",
     "multer": "^2.1.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "pdf-to-printer": "^5.7.0"
   }
 }
